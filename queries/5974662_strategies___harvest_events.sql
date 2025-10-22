@@ -1,10 +1,20 @@
+-- Query: Strategies - Harvest Events
+-- Description: **Yieldblox Pool Strategies (Blend) - Harvest Events**  
+- **Closed At & Closed At Hour**: Timestamp of when the harvest event occurred, crucial for tracking and analyzing event timing.  
+- **Asset**: Identifies the specific asset involved (USDC, EURC, XLM), essential for asset-specific performance analysis.  
+- **From Address**: Source address of the transaction, important for tracing transaction origins.  
+- **Amount**: Total amount harvested, key for assessing the scale of the event.  
+- **Price Per Share**: Value per share at the time of harvest, vital for evaluating investment returns.
+-- Source: https://dune.com/queries/5974662
+-- already part of a query repo
+
 -- Query: Yieldblox Pool Strategies (Blend) - Harvest Events
 -- Description: Shows all harvest events from YieldBlox strategy contracts with amount, from address, and price_per_share
 -- Now uses summary_strategies table to get the correct YieldBlox strategy addresses
 -- Includes strategies for: USDC, EURC, and XLM
 
 WITH strategy_contracts AS (
-    -- Get YieldBlox strategy contracts from summary_strategies table (query_6014850)
+    -- Get YieldBlox strategy contracts from summary_strategies table
     SELECT
         strategy_address AS contract_id,
         asset_token AS asset,

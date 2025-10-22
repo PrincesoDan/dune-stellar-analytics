@@ -1,3 +1,18 @@
+-- Query: fees_distributed_events
+-- Description: **DeFindex Vaults - FeesDistributed Events**  
+- **Closed At**: Timestamp of when the event was recorded, crucial for tracking and analyzing fee distribution over time.  
+- **Closed At Hour**: Aggregated hourly timestamp for temporal analysis of fee distribution patterns.  
+- **Vault**: Identifier for the specific vault, essential for associating distributed fees with the correct asset and strategy.  
+- **Vault Name**: Human-readable name of the vault, aiding in quick identification and reporting.  
+- **Asset**: The asset involved in the fee distribution, important for financial tracking and asset management.  
+- **Asset Code**: Code representing the asset, used for precise asset identification and reporting.  
+- **Recipient Address**: Address receiving the distributed fees, key for auditing and ensuring correct fee allocation.  
+- **Fee Amount**: The amount of fees distributed, critical for financial analysis and performance evaluation.  
+- **Transaction Hash**: Unique identifier for the transaction, useful for tracing and verifying specific events.  
+- **Transaction ID**: Identifier for the transaction, aiding in detailed transaction tracking and reconciliation.
+-- Source: https://dune.com/queries/5975266
+-- already part of a query repo
+
 -- Query: DeFindex Vaults - FeesDistributed Events
 -- Description: Shows all FeesDistributed events from DeFindex vaults with distributed fees details
 -- Event structure: distributed_fees: Vec<(Address, i128)>

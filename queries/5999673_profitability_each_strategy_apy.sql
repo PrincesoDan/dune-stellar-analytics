@@ -1,3 +1,9 @@
+-- Query: profitability_each_strategy_APY
+-- Description: **Strategy APY Calculation**  
+Calculates APY for each strategy based on price_per_share changes over 24h, 7d, and 30d periods to assess performance and optimize investment strategies.
+-- Source: https://dune.com/queries/5999673
+-- already part of a query repo
+
 -- Query: Strategy APY Calculation
 -- Description: Calculates APY for each strategy based on price_per_share changes
 -- Shows APY for 24h, 7d, and 30d periods using harvest events
