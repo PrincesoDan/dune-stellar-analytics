@@ -133,20 +133,38 @@ extracted_fields AS (
     FROM parsed_values pv
     CROSS JOIN UNNEST(pv.val_map) AS t(field)
     GROUP BY pv.vault, pv.closed_at, pv.ledger_sequence, pv.strategy_address, pv.val_map
+),
+
+-- Rank records to get the latest locked_fee per vault
+ranked_records AS (
+    SELECT
+        ef.closed_at,
+        ef.ledger_sequence,
+        ef.vault,
+        ef.strategy_address,
+        ef.locked_fee,
+        ef.gains_or_losses,
+        ef.prev_balance,
+        ROW_NUMBER() OVER (
+            PARTITION BY ef.vault, ef.strategy_address
+            ORDER BY ef.closed_at DESC, ef.ledger_sequence DESC
+        ) AS rn
+    FROM extracted_fields ef
 )
 
--- Final assembly with vault information
+-- Final assembly with vault information - showing only the latest record per vault+strategy
 SELECT
-    ef.closed_at,
-    ef.ledger_sequence,
-    ef.vault,
+    rr.closed_at,
+    rr.ledger_sequence,
+    rr.vault,
     vl.vault_name,
     vl.asset,
     vl.asset_code,
-    ef.strategy_address,
-    ef.locked_fee,
-    ef.gains_or_losses,
-    ef.prev_balance
-FROM extracted_fields ef
-LEFT JOIN vault_list vl ON vl.vault = ef.vault
-ORDER BY ef.closed_at DESC, ef.vault, ef.strategy_address;
+    rr.strategy_address,
+    rr.locked_fee,
+    rr.gains_or_losses,
+    rr.prev_balance
+FROM ranked_records rr
+LEFT JOIN vault_list vl ON vl.vault = rr.vault
+WHERE rr.rn = 1
+ORDER BY rr.closed_at DESC, rr.vault, rr.strategy_address;

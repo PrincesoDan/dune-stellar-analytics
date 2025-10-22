@@ -1,15 +1,17 @@
 -- Query: Yieldblox Pool Strategies (Blend) - Harvest Events
--- Description: Shows all harvest events from BlendStrategy contracts with amount, from address, and price_per_share
+-- Description: Shows all harvest events from YieldBlox strategy contracts with amount, from address, and price_per_share
+-- Now uses summary_strategies table to get the correct YieldBlox strategy addresses
 -- Includes strategies for: USDC, EURC, and XLM
 
 WITH strategy_contracts AS (
-    SELECT contract_id, asset
-    FROM (VALUES
-        ('CDB2WMKQQNVZMEBY7Q7GZ5C7E7IAFSNMZ7GGVD6WKTCEWK7XOIAVZSAP', 'USDC'),
-        ('CA33NXYN7H3EBDSA3U2FPSULGJTTL3FQRHD2ADAAPTKS3FUJOE73735A', 'EURC'),
-        ('CBDOIGFO2QOOZTWQZ7AFPH5JOUS2SBN5CTTXR665NHV6GOCM6OUGI5KP', 'XLM'),
-        ('CDPWNUW7UMCSVO36VAJSQHQECISPJLCVPDASKHRC5SEROAAZDUQ5DG2Z', 'XLM')
-    ) AS t(contract_id, asset)
+    -- Get YieldBlox strategy contracts from summary_strategies table (query_6014850)
+    SELECT
+        strategy_address AS contract_id,
+        asset_token AS asset,
+        strategy_name
+    FROM query_6014850
+    WHERE strategy_name LIKE '%yieldblox_strategy%'
+      AND asset_token IN ('USDC', 'EURC', 'XLM')
 ),
 
 base AS (
