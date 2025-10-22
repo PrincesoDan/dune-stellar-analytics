@@ -1,13 +1,7 @@
 -- Query: vaults_locked_fees
 -- Description: **DeFindex Vaults - Locked Fees Analysis**  
-The key metrics "locked_fee," "gains_or_losses," and "prev_balance" are crucial for assessing the financial health and performance of DeFindex Vaults, providing insights into fee accumulation, profitability, and historical balance trends for strategic decision-making.
 -- Source: https://dune.com/queries/5975332
 -- already part of a query repo
-
--- Query: DeFindex Vaults - Locked Fees from Report Data
--- Description: Extracts locked_fee from persistent contract data (Report key)
--- Data structure: Key = ["Report"sym, <strategy_address>], Value = {gains_or_losses, locked_fee, prev_balance}
--- Source: stellar.contract_data
 
 WITH vault_list AS (
     SELECT

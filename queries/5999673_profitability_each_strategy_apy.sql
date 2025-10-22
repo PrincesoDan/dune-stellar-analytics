@@ -1,12 +1,8 @@
 -- Query: profitability_each_strategy_APY
 -- Description: **Strategy APY Calculation**  
-Calculates APY for each strategy based on price_per_share changes over 24h, 7d, and 30d periods to assess performance and optimize investment strategies.
+-- **Calculates APY for each strategy based on price_per_share changes over 24h, 7d, and 30d periods to assess performance and optimize investment strategies.**
 -- Source: https://dune.com/queries/5999673
--- already part of a query repo
 
--- Query: Strategy APY Calculation
--- Description: Calculates APY for each strategy based on price_per_share changes
--- Shows APY for 24h, 7d, and 30d periods using harvest events
 -- APY Formula: ((last_pps / first_pps) ^ (365.2425 * MS_PER_DAY / timeDifference) - 1) * 100
 
 WITH strategy_list AS (
@@ -25,7 +21,7 @@ harvest_data AS (
     SELECT
         closed_at,
         asset,
-        contract_id,
+        strategy_address,
         price_per_share
     FROM query_5974662
     WHERE price_per_share IS NOT NULL
@@ -57,7 +53,7 @@ period_ranges AS (
         COUNT(CASE WHEN h.closed_at >= lt.max_time - INTERVAL '30' DAY THEN 1 END) AS count_30d
     FROM strategy_list sl
     CROSS JOIN latest_time lt
-    LEFT JOIN harvest_data h ON h.contract_id = sl.contract_id
+    LEFT JOIN harvest_data h ON h.strategy_address = sl.contract_id
     GROUP BY sl.contract_id, sl.asset
 ),
 
@@ -86,7 +82,7 @@ pps_values AS (
         pr.count_30d
     FROM period_ranges pr
     LEFT JOIN harvest_data h
-        ON h.contract_id = pr.contract_id
+        ON h.strategy_address = pr.contract_id
         AND (
             h.closed_at = pr.first_time_24h OR h.closed_at = pr.last_time_24h OR
             h.closed_at = pr.first_time_7d OR h.closed_at = pr.last_time_7d OR

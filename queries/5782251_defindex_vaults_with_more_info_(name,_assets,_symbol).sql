@@ -1,6 +1,6 @@
 -- Query: DeFindex Vaults with more info (Name, Assets, Symbol)
 -- Description: Currently only supporting Vaults with one asset!
-It does take only the first asset of the list!!!!
+-- It does take only the first asset of the list!!!!
 -- Source: https://dune.com/queries/5782251
 -- already part of a query repo
 

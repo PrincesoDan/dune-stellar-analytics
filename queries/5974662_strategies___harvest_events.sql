@@ -1,17 +1,15 @@
 -- Query: Strategies - Harvest Events
--- Description: **Yieldblox Pool Strategies (Blend) - Harvest Events**  
-- **Closed At & Closed At Hour**: Timestamp of when the harvest event occurred, crucial for tracking and analyzing event timing.  
-- **Asset**: Identifies the specific asset involved (USDC, EURC, XLM), essential for asset-specific performance analysis.  
-- **From Address**: Source address of the transaction, important for tracing transaction origins.  
-- **Amount**: Total amount harvested, key for assessing the scale of the event.  
-- **Price Per Share**: Value per share at the time of harvest, vital for evaluating investment returns.
+-- Description: Shows all harvest events from YieldBlox strategy contracts
+-- Columns:
+--   - hour: Timestamp rounded to hour of when the harvest event occurred
+--   - strategy_address: Contract address of the strategy
+--   - asset: Asset/token (USDC, EURC, XLM)
+--   - amount: Total amount harvested
+--   - price_per_share: Value per share at the time of harvest
+--   - hash: Transaction hash
+--   - closed_at: Exact timestamp of the event
 -- Source: https://dune.com/queries/5974662
--- already part of a query repo
-
--- Query: Yieldblox Pool Strategies (Blend) - Harvest Events
--- Description: Shows all harvest events from YieldBlox strategy contracts with amount, from address, and price_per_share
--- Now uses summary_strategies table to get the correct YieldBlox strategy addresses
--- Includes strategies for: USDC, EURC, and XLM
+-- Uses summary_strategies table (query_6014850) to get YieldBlox strategy addresses
 
 WITH strategy_contracts AS (
     -- Get YieldBlox strategy contracts from summary_strategies table
@@ -30,24 +28,12 @@ base AS (
         he.closed_at,
         DATE_TRUNC('hour', he.closed_at) AS closed_at_hour,
         he.transaction_hash AS tx_hash,
-        he.transaction_id AS tx_id,
         he.topics_decoded,
         CAST(json_extract(he.data_decoded,'$.map') AS array(json)) AS map_elems
     FROM stellar.history_contract_events he
     WHERE he.contract_id IN (SELECT contract_id FROM strategy_contracts)
       AND he.topics_decoded LIKE '%BlendStrategy%'
       AND he.topics_decoded LIKE '%harvest%'
-),
-
--- Extract 'from' address
-from_addr AS (
-    SELECT
-        b.tx_hash,
-        MAX(json_extract_scalar(e,'$.val.address')) AS from_address
-    FROM base b
-    CROSS JOIN UNNEST(b.map_elems) AS t(e)
-    WHERE json_extract_scalar(e,'$.key.symbol') = 'from'
-    GROUP BY b.tx_hash
 ),
 
 -- Extract 'amount' (i128)
@@ -104,22 +90,15 @@ price_data AS (
 
 -- Final assembly
 SELECT
-    b.closed_at,
-    b.closed_at_hour,
+    b.closed_at_hour AS hour,
+    b.contract_id AS strategy_address,
     sc.asset,
-    b.contract_id,
-    b.tx_hash,
-    b.tx_id,
-    f.from_address AS "from",
     a.amount,
     p.price_per_share,
-    -- Calculate amount in standard units (dividing by 1e7 for Stellar 7 decimal places)
-    a.amount AS amount_raw,
-    -- Calculate price per share in standard units
-    p.price_per_share AS price_per_share_raw
+    b.tx_hash AS hash,
+    b.closed_at
 FROM base b
 LEFT JOIN strategy_contracts sc ON sc.contract_id = b.contract_id
-LEFT JOIN from_addr f ON f.tx_hash = b.tx_hash
 LEFT JOIN amount_data a ON a.tx_hash = b.tx_hash
 LEFT JOIN price_data p ON p.tx_hash = b.tx_hash
 ORDER BY b.closed_at DESC;

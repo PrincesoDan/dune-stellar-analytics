@@ -1,12 +1,6 @@
 -- Query: summary_strategies
--- Description: **DeFindex Strategy Overview**  
-The query lists all DeFindex strategies, providing their names, addresses, and associated assets. This helps in tracking and managing the performance and allocation of each strategy within the DeFindex platform.
--- Source: https://dune.com/queries/6014850
+-- Description: **DeFindex Strategy Overview**  -- Source: https://dune.com/queries/6014850
 -- already part of a query repo
-
--- Query: Summary Strategies
--- Description: Hardcoded table with strategy names, addresses and assets/tokens
--- This table contains all DeFindex strategies and their associated assets
 
 SELECT
     strategy_name,
