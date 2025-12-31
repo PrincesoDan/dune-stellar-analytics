@@ -9,7 +9,7 @@ WITH vault_to_token AS (
         asset,
         asset_code,
         vault_name
-    FROM query_5782251
+    FROM dune.paltalabs.result_de_findex_vaults_with_more_info_name_assets_symbol
 ),
 
 base AS (

@@ -1,4 +1,9 @@
 -- Query: Strategies - Harvest Events
+-- Description: **Yieldblox Pool Strategies (Blend) - Harvest Events**  
+-- Source: https://dune.com/queries/5974662
+-- already part of a query repo
+
+-- Query: Strategies - Harvest Events
 -- Description: Shows all harvest events from YieldBlox strategy contracts
 -- Columns:
 --   - hour: Timestamp rounded to hour of when the harvest event occurred
@@ -6,7 +11,7 @@
 --   - asset: Asset/token (USDC, EURC, XLM)
 --   - amount: Total amount harvested
 --   - price_per_share: Value per share at the time of harvest
---   - hash: Transaction hash
+--   - tx_hash: Transaction hash
 --   - closed_at: Exact timestamp of the event
 -- Source: https://dune.com/queries/5974662
 -- Uses summary_strategies table (query_6014850) to get YieldBlox strategy addresses
@@ -95,7 +100,7 @@ SELECT
     sc.asset,
     a.amount,
     p.price_per_share,
-    b.tx_hash AS hash,
+    b.tx_hash AS tx_hash,
     b.closed_at
 FROM base b
 LEFT JOIN strategy_contracts sc ON sc.contract_id = b.contract_id

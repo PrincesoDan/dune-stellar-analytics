@@ -96,20 +96,21 @@ pps_values AS (
 
 -- Calculate APY for each period
 SELECT
-    asset,
-    contract_id,
+    pv.asset,
+    pv.contract_id AS strategy_address,
+    sl.strategy_name,
 
     -- 24h APY
     CASE
-        WHEN pps_24h_start IS NOT NULL
-            AND pps_24h_end IS NOT NULL
-            AND pps_24h_start > 0
-            AND last_time_24h > first_time_24h
+        WHEN pv.pps_24h_start IS NOT NULL
+            AND pv.pps_24h_end IS NOT NULL
+            AND pv.pps_24h_start > 0
+            AND pv.last_time_24h > pv.first_time_24h
         THEN ROUND(
             CAST(
                 (POWER(
-                    pps_24h_end / pps_24h_start,
-                    365.2425 * 86400000.0 / (TO_UNIXTIME(last_time_24h) * 1000.0 - TO_UNIXTIME(first_time_24h) * 1000.0)
+                    pv.pps_24h_end / pv.pps_24h_start,
+                    365.2425 * 86400000.0 / (TO_UNIXTIME(pv.last_time_24h) * 1000.0 - TO_UNIXTIME(pv.first_time_24h) * 1000.0)
                 ) - 1) * 100
             AS DECIMAL(38,2))
         , 2)
@@ -118,15 +119,15 @@ SELECT
 
     -- 7d APY
     CASE
-        WHEN pps_7d_start IS NOT NULL
-            AND pps_7d_end IS NOT NULL
-            AND pps_7d_start > 0
-            AND last_time_7d > first_time_7d
+        WHEN pv.pps_7d_start IS NOT NULL
+            AND pv.pps_7d_end IS NOT NULL
+            AND pv.pps_7d_start > 0
+            AND pv.last_time_7d > pv.first_time_7d
         THEN ROUND(
             CAST(
                 (POWER(
-                    pps_7d_end / pps_7d_start,
-                    365.2425 * 86400000.0 / (TO_UNIXTIME(last_time_7d) * 1000.0 - TO_UNIXTIME(first_time_7d) * 1000.0)
+                    pv.pps_7d_end / pv.pps_7d_start,
+                    365.2425 * 86400000.0 / (TO_UNIXTIME(pv.last_time_7d) * 1000.0 - TO_UNIXTIME(pv.first_time_7d) * 1000.0)
                 ) - 1) * 100
             AS DECIMAL(38,2))
         , 2)
@@ -135,40 +136,41 @@ SELECT
 
     -- 30d APY
     CASE
-        WHEN pps_30d_start IS NOT NULL
-            AND pps_30d_end IS NOT NULL
-            AND pps_30d_start > 0
-            AND last_time_30d > first_time_30d
+        WHEN pv.pps_30d_start IS NOT NULL
+            AND pv.pps_30d_end IS NOT NULL
+            AND pv.pps_30d_start > 0
+            AND pv.last_time_30d > pv.first_time_30d
         THEN ROUND(
             CAST(
                 (POWER(
-                    pps_30d_end / pps_30d_start,
-                    365.2425 * 86400000.0 / (TO_UNIXTIME(last_time_30d) * 1000.0 - TO_UNIXTIME(first_time_30d) * 1000.0)
+                    pv.pps_30d_end / pv.pps_30d_start,
+                    365.2425 * 86400000.0 / (TO_UNIXTIME(pv.last_time_30d) * 1000.0 - TO_UNIXTIME(pv.first_time_30d) * 1000.0)
                 ) - 1) * 100
             AS DECIMAL(38,2))
         , 2)
         ELSE NULL
-    END AS apy_30d,
+    END AS apy_30d
 
     -- Additional context columns
     -- Event counts for diagnostics
-    count_24h AS events_24h,
-    count_7d AS events_7d,
-    count_30d AS events_30d,
+    --pv.count_24h AS events_24h,
+    --pv.count_7d AS events_7d,
+    --pv.count_30d AS events_30d,
 
     -- PPS values for reference
-    pps_24h_start,
-    pps_24h_end,
-    first_time_24h,
-    last_time_24h,
-    pps_7d_start,
-    pps_7d_end,
-    first_time_7d,
-    last_time_7d,
-    pps_30d_start,
-    pps_30d_end,
-    first_time_30d,
-    last_time_30d
+    --pv.pps_24h_start,
+    --pv.pps_24h_end,
+    --pv.first_time_24h,
+    --pv.last_time_24h,
+    --pv.pps_7d_start,
+    --pv.pps_7d_end,
+    --pv.first_time_7d,
+    --pv.last_time_7d,
+    --pv.pps_30d_start,
+    --pv.pps_30d_end,
+    --pv.first_time_30d,
+    --pv.last_time_30d
 
-FROM pps_values
-ORDER BY asset, contract_id;
+FROM pps_values pv
+LEFT JOIN strategy_list sl ON sl.contract_id = pv.contract_id
+ORDER BY pv.asset, pv.contract_id;

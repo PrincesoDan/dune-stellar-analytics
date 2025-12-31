@@ -34,13 +34,13 @@ events AS (
 ),
 
 /* ──────────────────────────────────────────────────────────────────────────
-   3. Deduplicated daily prices since March 1, 2024
+   3. Deduplicated daily prices from both tables
    ────────────────────────────────────────────────────────────────────────── */
 prices AS (
     SELECT
         contract_id AS token,
         price,
-        closed_at_day AS hour
+        closed_at_day AS day
     FROM (
         SELECT
             contract_id,
@@ -50,7 +50,21 @@ prices AS (
                 PARTITION BY contract_id, closed_at_day
                 ORDER BY closed_at_day DESC
             ) AS rn
-        FROM dune.paltalabs."result_soroswap_tokens_sdex_prices_daily_since_march_2024"
+        FROM (
+            SELECT
+                contract_id,
+                closed_at_day,
+                price
+            FROM dune.paltalabs.result_soroswap_tokens_sdex_prices_march_2024_to_october_2025
+
+            UNION ALL
+
+            SELECT
+                contract_id,
+                closed_at_day,
+                price
+            FROM dune.paltalabs.result_soroswap_tokens_sdex_prices_since_november_2025
+        ) u
     ) t
     WHERE rn = 1
 ),
@@ -73,7 +87,7 @@ tvl_vault_hour AS (
     FROM events e
     LEFT JOIN prices p
         ON p.token = e.asset
-        AND DATE_TRUNC('day', e.hour) = p.hour
+       AND p.day = DATE_TRUNC('day', e.hour)
     WHERE (e.asset_code = 'USDC')
        OR (p.price IS NOT NULL)
 )
